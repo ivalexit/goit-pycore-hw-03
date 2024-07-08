@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-def get_upcoming_birthdays(users, exclude_name=None): 
+def get_upcoming_birthdays(users, exclude_name=None): #створення функції(з виключенням паскудних співробітників)
     today = datetime.today().date()
     list_of_birthdays = []
     
