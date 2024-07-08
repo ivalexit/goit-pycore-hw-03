@@ -9,6 +9,9 @@ def get_days_from_today(date):                              #створення 
     today = datetime.today().date()                         #отримання актуальної дати
     delta = today - some_date                               #обчислення
     return delta.days                                       #різниця у днях
-  except:
-    ValueError                                              #вийняток
+  except ValueError:                                        #вийняток
     return "Некорректний формат дати"
+  
+
+print(get_days_from_today("40236-134-900"))  #вийняток
+print(get_days_from_today("2095-12-29"))     #різниця
