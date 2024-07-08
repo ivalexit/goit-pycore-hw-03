@@ -1,30 +1,45 @@
-import re
+from datetime import datetime, timedelta
 
-def normalize_phone(phone_number):
-    # Видалення зайвих символів, залишаючи тільки цифри та символ '+'
-    phone_number = re.sub(r'[^\d+]', '', phone_number)
+def get_upcoming_birthdays(users, exclude_name=None): 
+    today = datetime.today().date()
+    list_of_birthdays = []
     
-    # Додавання префіксу '+' для номерів, що починаються з '380'
-    if phone_number.startswith('380'):
-        phone_number = '+' + phone_number
-    # Додавання міжнародного коду країни '+38' для номерів без коду
-    elif not phone_number.startswith('+38'):
-        phone_number = '+38' + phone_number
+    for user in users:
+        name = user["name"]
+        if name == exclude_name:
+            continue
+        birthday = datetime.strptime(user["birthday"], "%Y.%m.%d").date() #дата->обʼєкт
+        birthday_this_year = birthday.replace(year=today.year)            #рік народження->поточний рік
+        
+        if birthday_this_year < today:                  #перенесення минувших др на наступний рік
+            birthday_this_year = birthday_this_year.replace(year=today.year + 1)
+        
+        
+        difference_in_days = (birthday_this_year - today).days    #різнмця між датами
+        
+        if 0 <= difference_in_days <= 7:   #перевірка др протягом тижня
+            #др на вихідних
+            if birthday_this_year.weekday() == 5:  #якщо субота
+                congratulation_date = birthday_this_year + timedelta(days=2)
+            elif birthday_this_year.weekday() == 6:  #якщо неділя
+                congratulation_date = birthday_this_year + timedelta(days=1)
+            else:
+                congratulation_date = birthday_this_year
+            #список привітань
+            list_of_birthdays.append({ 
+                "name": name,
+                "congratulation_date": congratulation_date.strftime("%Y.%m.%d")
+            })
     
-    # Повернення нормалізованого номеру телефону
-    return phone_number
+    return list_of_birthdays
 
-raw_numbers = [
-    "067\\t123 4567",
-    "(095) 234-5678\\n",
-    "+380 44 123 4567",
-    "380501234567",
-    "    +38(050)123-32-34",
-    "     0503451234",
-    "(050)8889900",
-    "38050-111-22-22",
-    "38050 111 22 11   ",
+#використання функції
+users = [
+    {"name": "Taras Shevchenko", "birthday": "1814.03.09"},
+    {"name": "Larysa Kosach", "birthday": "1871.02.25"},
+    {"name": "Viktor Yanukovych", "birthday": "1950.07.09"},
+    {"name": "Myroslav Skoryk", "birthday": "1938.07.13"},
 ]
 
-sanitized_numbers = [normalize_phone(num) for num in raw_numbers]
-print("Нормалізовані номери телефонів для SMS-розсилки:", sanitized_numbers)
+list_of_birthdays = get_upcoming_birthdays(users, exclude_name="Viktor Yanukovych")
+print("На цьому тижні сердечно вітаємо:", list_of_birthdays)
